@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Room</string>
+    <string name="list_fragment_label">My Diary</string>
+    <string name="write_label">How Have You Been Today?</string>
+    <string name="update_label">What would you like to Update?</string>
+    <string name="save">Save</string>
+    <string name="title">Title</string>
+    <string name="content">Content</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
+</resources>
