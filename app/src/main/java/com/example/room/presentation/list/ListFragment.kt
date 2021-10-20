@@ -34,6 +34,7 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setAddDiaryClickListener()
+        setHasFixedSize()
         setRvDiaryAdapter()
         setVerticalItemDecoration()
         setAllDiariesCollect()
@@ -47,6 +48,10 @@ class ListFragment : Fragment() {
             )
             findNavController().navigate(action)
         }
+    }
+
+    private fun setHasFixedSize() {
+        binding.rvDiary.setHasFixedSize(true)
     }
 
     private fun setRvDiaryAdapter() {
