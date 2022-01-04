@@ -7,7 +7,7 @@ import javax.inject.Inject
 class DeleteDiaryUseCase @Inject constructor(
     private val diaryRepository: DiaryRepository
 ) {
-    fun deleteDiary(idx: Int) = flow {
+    fun deleteDiary(idx: Int) = flow<Boolean> {
         runCatching {
             diaryRepository.deleteDiary(idx)
         }.onSuccess {

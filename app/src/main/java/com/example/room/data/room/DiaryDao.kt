@@ -4,12 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.room.data.entity.Diary
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DiaryDao {
-    @Query("SELECT * FROM diary_database ORDER BY idx DESC")
-    fun getAllDiaries(): Flow<List<Diary>>
+    @Query("SELECT * FROM diary_database ORDER BY idx DESC LIMIT 30 OFFSET :index * 10;")
+    suspend fun getAllDiaries(index: Int): List<Diary>
 
     @Query("SELECT * FROM diary_database WHERE idx = :idx")
     suspend fun getDetailDiary(idx: Int): Diary

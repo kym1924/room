@@ -7,7 +7,7 @@ import javax.inject.Inject
 class UpdateDiaryUseCase @Inject constructor(
     private val diaryRepository: DiaryRepository
 ) {
-    fun updateDiary(idx: Int, title: String, content: String) = flow {
+    fun updateDiary(idx: Int, title: String, content: String) = flow<Boolean> {
         runCatching {
             diaryRepository.updateDiary(idx, title, content)
         }.onSuccess {

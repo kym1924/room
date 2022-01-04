@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.room.R
@@ -14,6 +16,9 @@ import com.example.room.databinding.FragmentListBinding
 import com.example.room.util.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 
 @AndroidEntryPoint
 class ListFragment : Fragment() {
@@ -33,14 +38,12 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setAddDiaryClickListener()
-        setHasFixedSize()
-        setRvDiaryAdapter()
-        setVerticalItemDecoration()
-        setAllDiariesCollect()
+        initClickListener()
+        initRecyclerView()
+        initCollect()
     }
 
-    private fun setAddDiaryClickListener() {
+    private fun initClickListener() {
         binding.fabAddDiary.setOnClickListener {
             val action = ListFragmentDirections.actionListFragmentToWriteFragment(
                 -1,
@@ -50,27 +53,38 @@ class ListFragment : Fragment() {
         }
     }
 
-    private fun setHasFixedSize() {
-        binding.rvDiary.setHasFixedSize(true)
-    }
-
-    private fun setRvDiaryAdapter() {
-        binding.rvDiary.adapter = diaryAdapter
-    }
-
-    private fun setVerticalItemDecoration() {
-        binding.rvDiary.addItemDecoration(
-            DividerItemDecoration(
-                requireContext(),
-                RecyclerView.VERTICAL
+    private fun initRecyclerView() {
+        with(binding.rvDiary) {
+            setHasFixedSize(true)
+            adapter = diaryAdapter.withLoadStateHeaderAndFooter(
+                header = DiaryLoadAdapter { diaryAdapter.retry() },
+                footer = DiaryLoadAdapter { diaryAdapter.retry() }
             )
-        )
+            addItemDecoration(DividerItemDecoration(requireContext(), RecyclerView.VERTICAL))
+        }
     }
 
-    private fun setAllDiariesCollect() {
+    private fun initCollect() {
         repeatOnLifecycle {
-            listViewModel.getAllDiaries().collect {
-                diaryAdapter.submitList(it)
+            listViewModel.getAllDiaries().collectLatest {
+                diaryAdapter.submitData(it)
+            }
+        }
+
+        repeatOnLifecycle {
+            diaryAdapter.loadStateFlow
+                .distinctUntilChangedBy { it.refresh }
+                .filter { it.refresh is LoadState.NotLoading }
+                .collect { binding.rvDiary.scrollToPosition(0) }
+        }
+
+        repeatOnLifecycle {
+            diaryAdapter.loadStateFlow.collectLatest { loadState ->
+                val isDiaryEmpty =
+                    loadState.refresh is LoadState.NotLoading && diaryAdapter.itemCount == 0
+                binding.rvDiary.isVisible = !isDiaryEmpty
+                binding.tvEmptyDiary.isVisible = isDiaryEmpty
+                binding.loadingProgress.isVisible = loadState.source.refresh is LoadState.Loading
             }
         }
     }
