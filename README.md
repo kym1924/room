@@ -12,9 +12,9 @@ Daily diary using *Room*.
 #### 1. Initialize
 ```groovy
 // build.gradle in Module
-implementation "androidx.room:room-ktx:2.3.0"
-implementation "androidx.room:room-runtime:2.3.0"
-kapt "androidx.room:room-compiler:2.3.0"
+implementation "androidx.room:room-ktx:2.4.0"
+implementation "androidx.room:room-runtime:2.4.0"
+kapt "androidx.room:room-compiler:2.4.0"
 ```
 <br>
 
